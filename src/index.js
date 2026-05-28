@@ -35,8 +35,7 @@ function createInlineRules(nonStandard) {
     { re: new RegExp(`^(\\$\\$)(?!\\$)${sp}(${displayContent()})${sp}\\$\\$(?!\\$)${after}`), displayMode: true },
     { re: new RegExp(`^(\\$(?!\\$))${sp}(${inlineMathContent('$')})${sp}\\$${after}`), displayMode: false },
     { re: new RegExp(`^(${escapeRegex(latexInlineOpen)})${sp}(${displayContent()})${sp}${escapeRegex(latexInlineClose)}${after}`), displayMode: false },
-    { re: new RegExp(`^(\\()${sp}(?!\\s*\\$)(${inlineMathContent(')')})${sp}\\)${after}`), displayMode: false },
-    { re: new RegExp(`^(\\[)${sp}(?!\\s*\\$)(${displayContent()})${sp}\\](?!\\()${after}`), displayMode: true },
+    { re: new RegExp(`^(${escapeRegex(latexDisplayOpen)})${sp}(${displayContent()})${sp}${escapeRegex(latexDisplayClose)}${after}`), displayMode: true },
   ];
 }
 
@@ -56,14 +55,14 @@ function isEscapedBackslash(src, index) {
   return index > 0 && src.charAt(index - 1) === '\\';
 }
 
-function isLatexInlineDelimiterStart(src, index) {
-  return !isEscapedBackslash(src, index) && src.startsWith(latexInlineOpen, index);
+function isLatexDelimiterStart(src, index, delimiter) {
+  return !isEscapedBackslash(src, index) && src.startsWith(delimiter, index);
 }
 
 function findDelimiterIndexes(src) {
   const indexes = new Set();
 
-  for (const ch of '$([') {
+  for (const ch of '$') {
     let search = 0;
     while (search < src.length) {
       const index = src.indexOf(ch, search);
@@ -81,7 +80,10 @@ function findDelimiterIndexes(src) {
     if (index === -1) {
       break;
     }
-    if (isLatexInlineDelimiterStart(src, index)) {
+    if (isLatexDelimiterStart(src, index, latexInlineOpen)) {
+      indexes.add(index);
+    }
+    if (isLatexDelimiterStart(src, index, latexDisplayOpen)) {
       indexes.add(index);
     }
     search = index + 1;
@@ -97,14 +99,7 @@ function canStartAt(src, index, nonStandard) {
   if (index === 0) {
     return true;
   }
-  return /[\s(\[]/.test(src.charAt(index - 1));
-}
-
-function shouldSkipDelimiter(possibleKatex) {
-  return (
-    (possibleKatex.startsWith('(') && /^\(\s*\$/.test(possibleKatex))
-    || (possibleKatex.startsWith('[') && /^\[\s*\$/.test(possibleKatex))
-  );
+  return /[\s(]/.test(src.charAt(index - 1));
 }
 
 function matchRules(src, rules) {
@@ -174,11 +169,6 @@ function inlineKatex(options, renderer) {
         if (canStartAt(indexSrc, index, nonStandard)) {
           const possibleKatex = indexSrc.substring(index);
 
-          if (shouldSkipDelimiter(possibleKatex)) {
-            indexSrc = indexSrc.substring(index + 1);
-            continue;
-          }
-
           if (rules.some(({ re }) => possibleKatex.match(re))) {
             return index;
           }
@@ -188,7 +178,7 @@ function inlineKatex(options, renderer) {
         if (ch === '$') {
           indexSrc = indexSrc.replace(/^\$+/, '');
         } else if (ch === '\\') {
-          indexSrc = indexSrc.replace(/^\\\(/, '');
+          indexSrc = indexSrc.replace(/^\\(?:\(|\[)/, '');
         }
       }
     },

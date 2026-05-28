@@ -68,14 +68,28 @@ $$
     'inline katex with a period inside': 'this is inline katex: $$2x.$$',
     'inline katex with a period inside in parens': '( $$2x.$$)',
     'inline katex with spaces around content': 'this is inline katex: $$ 2x $$',
-    'inline katex with paren delimiters': 'this is inline katex: ( 2x )',
-    'inline katex with paren delimiters no spaces': 'this is inline katex: (2x)',
-    'inline katex with bracket delimiters': 'this is inline katex: [ 2x ]',
-    'inline katex with bracket delimiters no spaces': 'this is inline katex: [2x]',
+    'inline katex with paren delimiters': String.raw`this is inline katex: \( 2x \)`,
+    'inline katex with paren delimiters no spaces': String.raw`this is inline katex: \(2x\)`,
+    'plain parens are not katex': 'this is not katex: ( 2x )',
+    'inline katex with bracket delimiters': String.raw`this is inline katex: \[ 2x \]`,
+    'inline katex with bracket delimiters no spaces': String.raw`this is inline katex: \[2x\]`,
+    'plain brackets are not katex': 'this is not katex: [ 2x ]',
     'inline katex with braces beside delimiter': 'this is inline katex: $${2x}$$',
     'markdown link is not katex': 'this is a [link](https://example.com) not katex',
     'inline katex with latex paren delimiters': String.raw`\(\left(r_0+\frac{k}{\rho}t\right)^3 v(t)\)`,
     'display katex with boxed expression': String.raw`$$ \boxed{ v(t)=\frac{g\rho}{4k}\left(r_0+\frac{k}{\rho}t\right) +\frac{r_0^3\left(v_0-\frac{g\rho r_0}{4k}\right)} {\left(r_0+\frac{k}{\rho}t\right)^3} } $$`,
+    'display katex with acceleration formula': String.raw`$$
+a(t)=\frac{3(k/\rho)}{r_0+(k/\rho)t}.
+$$`,
+    'display katex with velocity differential equation': String.raw`$$
+v' + a(t)\,v = g.
+$$`,
+    'display katex with substitution integral': String.raw`$$
+\int g\left(r_0+\frac{k}{\rho}t\right)^3dt
+=\int g u^3\left(\frac{\rho}{k}\right)du
+=\frac{g\rho}{k}\int u^3du
+=\frac{g\rho}{k}\cdot \frac{u^4}{4}.
+$$`,
     'inline katex with a comma after': 'this is inline katex: $x$,',
     'inline katex with a colon after': 'this is inline katex: $x$:',
     'inline katex $$...$': 'this is not katex: $$a\\raisebox{0.25em}{$b$}c$',
@@ -203,6 +217,10 @@ $$
 
     test('$ and \\( produce identical output', () => {
       expect(render(`$ ${inlineContent} $`)).toBe(render(String.raw`\( ${inlineContent} \)`));
+    });
+
+    test('$$ and \\[ produce identical inline output', () => {
+      expect(render(`$$ ${inlineContent} $$`)).toBe(render(String.raw`\[ ${inlineContent} \]`));
     });
   });
 
