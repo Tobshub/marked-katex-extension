@@ -65,6 +65,8 @@ $$
     'inline katex with a question mark after': 'this is inline katex: $x$?',
     'inline katex with an exclamation mark after': 'this is inline katex: $x$!',
     'inline katex with a period after': 'this is inline katex: $x$.',
+    'inline katex with a period inside': 'this is inline katex: $$2x.$$',
+    'inline katex with a period inside in parens': '( $$2x.$$)',
     'inline katex with a comma after': 'this is inline katex: $x$,',
     'inline katex with a colon after': 'this is inline katex: $x$:',
     'inline katex $$...$': 'this is not katex: $$a\\raisebox{0.25em}{$b$}c$',

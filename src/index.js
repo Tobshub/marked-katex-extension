@@ -1,6 +1,6 @@
 import katex from 'katex';
 
-const inlineRule = /^(\${1,2})(?!\$)((?:\\.|[^\\\n])*?(?:\\.|[^\\\n\$]))\1(?=[\s?!\.,:？！。，：]|$)/;
+const inlineRule = /^(\${1,2})(?!\$)((?:\\.|[^\\\n])*?(?:\\.|[^\\\n\$]))\1(?=[\s?!\.,:？！。，：)\]]|$)/;
 const inlineRuleNonStandard = /^(\${1,2})(?!\$)((?:\\.|[^\\\n])*?(?:\\.|[^\\\n\$]))\1/; // Non-standard, even if there are no spaces before and after $ or $$, try to parse
 
 const blockRule = /^(\${1,2})\n((?:\\[^]|[^\\])+?)\n\1(?:\n|$)/;
@@ -33,7 +33,7 @@ function inlineKatex(options, renderer) {
         if (index === -1) {
           return;
         }
-        const f = nonStandard ? index > -1 : index === 0 || indexSrc.charAt(index - 1) === ' ';
+        const f = nonStandard ? index > -1 : index === 0 || /[\s(\[]/.test(indexSrc.charAt(index - 1));
         if (f) {
           const possibleKatex = indexSrc.substring(index);
 

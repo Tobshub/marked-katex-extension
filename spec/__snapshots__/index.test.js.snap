@@ -146,6 +146,16 @@ exports[`marked-katex-extension inline katex with a period after 1`] = `
 "
 `;
 
+exports[`marked-katex-extension inline katex with a period inside 1`] = `
+"<p>this is inline katex: <span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mn>2</mn><mi>x</mi><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">2x.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span><span class="mord mathnormal">x</span><span class="mord">.</span></span></span></span></span></p>
+"
+`;
+
+exports[`marked-katex-extension inline katex with a period inside in parens 1`] = `
+"<p>( <span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mn>2</mn><mi>x</mi><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">2x.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span><span class="mord mathnormal">x</span><span class="mord">.</span></span></span></span></span>)</p>
+"
+`;
+
 exports[`marked-katex-extension inline katex with a question mark after 1`] = `
 "<p>this is inline katex: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>?</p>
 "
