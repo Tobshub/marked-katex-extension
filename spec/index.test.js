@@ -74,6 +74,8 @@ $$
     'inline katex with bracket delimiters no spaces': 'this is inline katex: [2x]',
     'inline katex with braces beside delimiter': 'this is inline katex: $${2x}$$',
     'markdown link is not katex': 'this is a [link](https://example.com) not katex',
+    'inline katex with latex paren delimiters': String.raw`\(\left(r_0+\frac{k}{\rho}t\right)^3 v(t)\)`,
+    'display katex with boxed expression': String.raw`$$ \boxed{ v(t)=\frac{g\rho}{4k}\left(r_0+\frac{k}{\rho}t\right) +\frac{r_0^3\left(v_0-\frac{g\rho r_0}{4k}\right)} {\left(r_0+\frac{k}{\rho}t\right)^3} } $$`,
     'inline katex with a comma after': 'this is inline katex: $x$,',
     'inline katex with a colon after': 'this is inline katex: $x$:',
     'inline katex $$...$': 'this is not katex: $$a\\raisebox{0.25em}{$b$}c$',
@@ -167,6 +169,42 @@ $$
       expect(marked(md)).toMatchSnapshot();
     });
   }
+
+  describe('equivalent delimiters', () => {
+    const displayContent = String.raw`\boxed{ v(t)=\frac{g\rho}{4k}\left(r_0+\frac{k}{\rho}t\right) }`;
+    const inlineContent = String.raw`\left(r_0+\frac{k}{\rho}t\right)^3 v(t)`;
+
+    function render(md) {
+      marked.setOptions(marked.getDefaults());
+      marked.use(markedKatex());
+      return marked(md);
+    }
+
+    function blockDollar(content) {
+      return `$$\n${content}\n$$`;
+    }
+
+    function blockBracket(content) {
+      return '\\[' + '\n' + content + '\n' + '\\]';
+    }
+
+    function blockLatexDollar(content, close = '$$') {
+      return String.raw`\$$` + '\n' + content + '\n' + close;
+    }
+
+    test('$$ and \\[ produce identical output', () => {
+      expect(render(blockDollar(displayContent))).toBe(render(blockBracket(displayContent)));
+    });
+
+    test('\\$$ and \\[ produce identical output', () => {
+      expect(render(blockLatexDollar(displayContent))).toBe(render(blockBracket(displayContent)));
+      expect(render(blockLatexDollar(displayContent, String.raw`\$$`))).toBe(render(blockBracket(displayContent)));
+    });
+
+    test('$ and \\( produce identical output', () => {
+      expect(render(`$ ${inlineContent} $`)).toBe(render(String.raw`\( ${inlineContent} \)`));
+    });
+  });
 
   describe('specs', () => {
     const hasOnly = specs.some(s => s.only);
