@@ -18,6 +18,10 @@ function blockContent() {
   return String.raw`(?:\\[^]|[^\\])+?`;
 }
 
+function environmentContent() {
+  return String.raw`(?:\\[^]|[^\\])*?`;
+}
+
 function inlineMathContent(endChar) {
   const escapedEnd = endChar.replace(/[$^\\[\]]/g, '\\$&');
   return String.raw`(?:\\.|[^\\\n])*?(?:\\.|[^\\\n${escapedEnd}])`;
@@ -36,6 +40,7 @@ function createInlineRules(nonStandard) {
     { re: new RegExp(`^(\\$(?!\\$))${sp}(${inlineMathContent('$')})${sp}\\$${after}`), displayMode: false },
     { re: new RegExp(`^(${escapeRegex(latexInlineOpen)})${sp}(${displayContent()})${sp}${escapeRegex(latexInlineClose)}${after}`), displayMode: false },
     { re: new RegExp(`^(${escapeRegex(latexDisplayOpen)})${sp}(${displayContent()})${sp}${escapeRegex(latexDisplayClose)}${after}`), displayMode: true },
+    { re: new RegExp(`^(\\\\begin\\{([^\\}]+)\\}(${environmentContent()})\\\\end\\{\\2\\})${after}`), displayMode: true },
   ];
 }
 
@@ -43,11 +48,12 @@ function createBlockRules() {
   const sp = optionalSpace;
 
   return [
-    { re: new RegExp(`^(\\$\\$)(?!\\$)${sp}?\n(${blockContent()})\n\\1(?:\n|$)`), displayMode: true },
+    { re: new RegExp(`^(\\$\\$)(?!\\$)${sp}?\n?(${blockContent()})\n?\\1(?:\n|$)`), displayMode: true },
     { re: new RegExp(`^(\\$)(?!\\$)\n(${blockContent()})\n\\1(?:\n|$)`), displayMode: false },
-    { re: new RegExp(`^(${escapeRegex(latexDisplayOpen)})${sp}?\n(${blockContent()})\n${escapeRegex(latexDisplayClose)}(?:\n|$)`), displayMode: true },
-    { re: new RegExp(`^(${escapeRegex(latexDollarDisplayOpen)})(?!\\$)${sp}?\n(${blockContent()})\n\\$\\$(?!\\$)(?:\n|$)`), displayMode: true },
-    { re: new RegExp(`^(${escapeRegex(latexDollarDisplayOpen)})(?!\\$)${sp}?\n(${blockContent()})\n${escapeRegex(latexDollarDisplayClose)}(?:\n|$)`), displayMode: true },
+    { re: new RegExp(`^(${escapeRegex(latexDisplayOpen)})${sp}?\n?(${blockContent()})\n?${escapeRegex(latexDisplayClose)}(?:\n|$)`), displayMode: true },
+    { re: new RegExp(`^(${escapeRegex(latexDollarDisplayOpen)})(?!\\$)${sp}?\n?(${blockContent()})\n?\\$\\$(?!\\$)(?:\n|$)`), displayMode: true },
+    { re: new RegExp(`^(${escapeRegex(latexDollarDisplayOpen)})(?!\\$)${sp}?\n?(${blockContent()})\n?${escapeRegex(latexDollarDisplayClose)}(?:\n|$)`), displayMode: true },
+    { re: new RegExp(`^(\\\\begin\\{([^\\}]+)\\}(${environmentContent()})\\\\end\\{\\2\\})(?:\n|$)`), displayMode: true },
   ];
 }
 
@@ -86,6 +92,9 @@ function findDelimiterIndexes(src) {
     if (isLatexDelimiterStart(src, index, latexDisplayOpen)) {
       indexes.add(index);
     }
+    if (isLatexDelimiterStart(src, index, '\\begin{')) {
+      indexes.add(index);
+    }
     search = index + 1;
   }
 
@@ -106,9 +115,10 @@ function matchRules(src, rules) {
   for (const { re, displayMode } of rules) {
     const match = src.match(re);
     if (match) {
+      const isEnvironment = re.source.includes('\\\\begin');
       return {
         raw: match[0],
-        text: match[2].trim(),
+        text: (isEnvironment ? match[0] : match[match.length - 1]).trim(),
         displayMode,
       };
     }
